@@ -2,7 +2,7 @@
 variable "existing_vpc_id" {
   type        = string
   description = "ID of the existing VPC"
-  default = "vpc-007222983437ca689"
+  default = "vpc-04ef858a4c609cde4"
 }
 
 variable "vpc_cidr" {
