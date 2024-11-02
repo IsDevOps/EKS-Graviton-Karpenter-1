@@ -1,6 +1,6 @@
-# output "vpc_id" {
-#   value = data.aws_vpc.main.id
-# }
+output "vpc_id" {
+  value = data.aws_vpc.main.id
+}
 
 output "subnet_ids" {
   value = aws_subnet.main[*].id
