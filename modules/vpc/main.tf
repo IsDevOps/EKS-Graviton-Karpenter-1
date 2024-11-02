@@ -1,9 +1,3 @@
-variable "vpc_cidr" {
-  type        = string
-  description = "CIDR block of the existing VPC"
-  default     = "172.31.0.0/16"
-}
-
 # Fetch the existing VPC by ID
 data "aws_vpc" "main" {
   id = var.existing_vpc_id  # Make sure to define `existing_vpc_id` in your variables
