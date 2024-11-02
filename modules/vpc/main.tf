@@ -21,29 +21,32 @@ resource "aws_subnet" "main" {
 
 
 # Internet Gateway for existing VPC (optional if it's not already created)
-data "aws_internet_gateway" "existing_igw" {
-  filter {
-    name   = "attachment.vpc-id"
-    values = [data.aws_vpc.main.id]
+resource "aws_internet_gateway" "my_igw" {
+  vpc_id = data.aws_vpc.main.id
+
+  tags = {
+    Name = "my-internet-gateway"
   }
 }
+
 
 resource "aws_route_table" "main" {
   vpc_id = data.aws_vpc.main.id
 
   route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = data.aws_internet_gateway.existing_igw.id
+    cidr_block = "0.0.0.0/0"  # This allows all internet traffic
+    gateway_id = aws_internet_gateway.my_igw.id  # Reference the new IGW
   }
 
   tags = {
-    Name = "ken-route-table"
+    Name = "main-route-table"
   }
 }
 
+
 # Associate the route table with subnets
 resource "aws_route_table_association" "main" {
-  count          = var.subnet_count
-  subnet_id      = aws_subnet.main[count.index].id
+  count          = var.subnet_count  # Assuming you are creating multiple subnets
+  subnet_id      = aws_subnet.main[count.index].id  # Adjust as per your subnet resource
   route_table_id = aws_route_table.main.id
 }
