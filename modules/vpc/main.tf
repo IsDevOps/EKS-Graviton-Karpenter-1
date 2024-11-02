@@ -47,9 +47,6 @@ output "vpc_id" {
   value = data.aws_vpc.main.id
 }
 
-output "subnet_ids" {
-  value = aws_subnet.main[*].id
-}
 
 output "igw_id" {
   value = data.aws_internet_gateway.existing_igw.id
