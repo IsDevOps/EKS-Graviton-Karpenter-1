@@ -43,10 +43,6 @@ resource "aws_route_table_association" "main" {
 }
 
 # Outputs for VPC, subnet, and gateway information if needed
-output "vpc_id" {
-  value = data.aws_vpc.main.id
-}
-
 
 output "igw_id" {
   value = data.aws_internet_gateway.existing_igw.id
