@@ -1,10 +1,17 @@
+# Fetch the existing VPC by ID
+data "aws_vpc" "main" {
+  id = var.existing_vpc_id  # Define `existing_vpc_id` in your variables
+}
 
-# Use the existing VPC's ID to create subnets
+# Fetch available availability zones in the current region
+data "aws_availability_zones" "available" {}
+
+# Dynamically calculated CIDR blocks for subnets
 resource "aws_subnet" "main" {
   count                   = var.subnet_count
   vpc_id                  = data.aws_vpc.main.id
-  cidr_block              = cidrsubnet(data.aws_vpc.main.cidr_block, 8, count.index)
-  availability_zone       = element(["us-east-1a", "us-east-1b"], count.index)
+  cidr_block              = cidrsubnet(data.aws_vpc.main.cidr_block, 4, count.index)
+  availability_zone       = data.aws_availability_zones.available.names[count.index]
   map_public_ip_on_launch = true
 
   tags = {
@@ -12,7 +19,7 @@ resource "aws_subnet" "main" {
   }
 }
 
-# Fetch the existing Internet Gateway attached to the VPC
+# Internet Gateway for existing VPC (optional if it's not already created)
 data "aws_internet_gateway" "existing_igw" {
   filter {
     name   = "attachment.vpc-id"
@@ -20,7 +27,6 @@ data "aws_internet_gateway" "existing_igw" {
   }
 }
 
-# Route table associated with the VPC
 resource "aws_route_table" "main" {
   vpc_id = data.aws_vpc.main.id
 
@@ -34,22 +40,9 @@ resource "aws_route_table" "main" {
   }
 }
 
-# Associate the route table with each subnet
+# Associate the route table with subnets
 resource "aws_route_table_association" "main" {
   count          = var.subnet_count
   subnet_id      = aws_subnet.main[count.index].id
   route_table_id = aws_route_table.main.id
-}
-
-# Outputs for VPC, subnet, and gateway information if needed
-output "vpc_id" {
-  value = data.aws_vpc.main.id
-}
-
-output "subnet_ids" {
-  value = aws_subnet.main[*].id
-}
-
-output "igw_id" {
-  value = data.aws_internet_gateway.existing_igw.id
 }
