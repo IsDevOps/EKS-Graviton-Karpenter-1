@@ -10,15 +10,14 @@ data "aws_availability_zones" "available" {}
 resource "aws_subnet" "main" {
   count                   = var.subnet_count
   vpc_id                  = data.aws_vpc.main.id
-  cidr_block              = cidrsubnet(data.aws_vpc.main.cidr_block, 6, count.index) # Changed from 4 to 6
+  cidr_block              = cidrsubnet(data.aws_vpc.main.cidr_block, 4, count.index)  # Ensure this doesn't overlap
   availability_zone       = data.aws_availability_zones.available.names[count.index]
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "ken-subnet-${count.index}"
+    Name = "my-subnet-${count.index}"
   }
 }
-
 
 # Internet Gateway for existing VPC (optional if it's not already created)
 resource "aws_internet_gateway" "my_igw" {
