@@ -1,17 +1,20 @@
-# Fetch the existing VPC by ID
-data "aws_vpc" "main" {
-  id = var.existing_vpc_id  # Define `existing_vpc_id` in your variables
+variable "vpc_cidr" {
+  type        = string
+  description = "CIDR block of the existing VPC"
+  default     = "172.31.0.0/16"
 }
 
-# Fetch available availability zones in the current region
-data "aws_availability_zones" "available" {}
+# Fetch the existing VPC by ID
+data "aws_vpc" "main" {
+  id = var.existing_vpc_id  # Make sure to define `existing_vpc_id` in your variables
+}
 
-# Dynamically calculated CIDR blocks for subnets
+# Create subnets from the existing VPC CIDR
 resource "aws_subnet" "main" {
   count                   = var.subnet_count
   vpc_id                  = data.aws_vpc.main.id
-  cidr_block              = cidrsubnet(data.aws_vpc.main.cidr_block, 4, count.index)
-  availability_zone       = data.aws_availability_zones.available.names[count.index]
+  cidr_block              = cidrsubnet(var.vpc_cidr, 4, count.index)  # Example: create /20 subnets
+  availability_zone       = element(data.aws_availability_zones.available.names, count.index)
   map_public_ip_on_launch = true
 
   tags = {
@@ -19,20 +22,22 @@ resource "aws_subnet" "main" {
   }
 }
 
-# Internet Gateway for existing VPC (optional if it's not already created)
-data "aws_internet_gateway" "existing_igw" {
-  filter {
-    name   = "attachment.vpc-id"
-    values = [data.aws_vpc.main.id]
+# Create an Internet Gateway
+resource "aws_internet_gateway" "main" {
+  vpc_id = data.aws_vpc.main.id
+
+  tags = {
+    Name = "ken-igw"
   }
 }
 
+# Create a route table
 resource "aws_route_table" "main" {
   vpc_id = data.aws_vpc.main.id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = data.aws_internet_gateway.existing_igw.id
+    gateway_id = aws_internet_gateway.main.id
   }
 
   tags = {
