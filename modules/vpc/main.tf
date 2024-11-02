@@ -1,19 +1,3 @@
-# Variables for existing VPC ID and subnet count
-variable "existing_vpc_id" {
-  type        = string
-  description = "ID of the existing VPC"
-}
-
-variable "subnet_count" {
-  type        = number
-  description = "Number of subnets to create"
-  default     = 2
-}
-
-# Fetch the existing VPC by ID
-data "aws_vpc" "main" {
-  id = var.existing_vpc_id
-}
 
 # Use the existing VPC's ID to create subnets
 resource "aws_subnet" "main" {
