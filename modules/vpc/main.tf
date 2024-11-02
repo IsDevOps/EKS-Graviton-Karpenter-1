@@ -18,8 +18,8 @@ data "aws_internet_gateway" "main" {
 resource "aws_subnet" "main" {
   count                   = var.subnet_count
   vpc_id                  = data.aws_vpc.main.id
-  cidr_block              = cidrsubnet(var.vpc_cidr, 8, count.index)
-  availability_zone       = element(["us-east-1a", "us-east-1b"], count.index)
+  cidr_block              = cidrsubnet(data.aws_vpc.main.cidr_block, 4, count.index)
+  availability_zone       = data.aws_availability_zones.available.names[count.index]
   map_public_ip_on_launch = true
 
   tags = {
