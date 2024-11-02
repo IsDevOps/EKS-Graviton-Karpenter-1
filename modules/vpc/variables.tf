@@ -8,7 +8,7 @@ variable "existing_vpc_id" {
 variable "vpc_cidr" {
   type        = string
   description = "CIDR block of the existing VPC"
-  default  =  "10.0.0.0/16"
+  default  =  "10.0.128.0/20"
 }
 
 variable "subnet_count" {
