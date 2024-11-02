@@ -9,10 +9,11 @@ data "aws_availability_zones" "available" {
 }
 
 # Resource to create subnets
+# Using a custom CIDR block for subnets within the defined range
 resource "aws_subnet" "main" {
   count                   = var.subnet_count
   vpc_id                  = data.aws_vpc.main.id
-  cidr_block              = cidrsubnet(var.vpc_cidr, 8, count.index)
+  cidr_block              = cidrsubnet("10.0.128.0/20", 4, count.index)  # Adjust the prefix length if necessary
   availability_zone       = data.aws_availability_zones.available.names[count.index]
   map_public_ip_on_launch = true
 
@@ -21,7 +22,22 @@ resource "aws_subnet" "main" {
   }
 }
 
+
 # Resource for Internet Gateway
-resource "aws_internet_gateway" "my_igw" {
+# Data block to find the existing Internet Gateway
+data "aws_internet_gateway" "existing_igw" {
+  filter {
+    name   = "attachment.vpc-id"
+    values = [var.existing_vpc_id]
+  }
+}
+
+# Use the existing Internet Gateway instead of creating a new one
+resource "aws_route_table" "public" {
   vpc_id = data.aws_vpc.main.id
+
+  route {
+    cidr_block              = "0.0.0.0/0"
+    gateway_id              = data.aws_internet_gateway.existing_igw.id
+  }
 }
