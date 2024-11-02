@@ -56,11 +56,5 @@ resource "aws_eks_node_group" "main" {
     max_size     = 2
     min_size     = 1
   }
-
-  instance_types = ["t3.small"]
-
-  remote_access {
-    ec2_ssh_key               = var.ssh_key_name
-    source_security_group_ids = [aws_security_group.node_sg.id]
-  }
+ 
 }
